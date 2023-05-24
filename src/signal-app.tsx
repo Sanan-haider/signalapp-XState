@@ -5,29 +5,49 @@ const trafficLightMachine = createMachine(
     id: 'trafficLight',
     initial: 'red',
     context: {
-      timer: 20,
+      timer: 30,
     },
     states: {
       red: {
         entry: 'resetTimer',
         on: {
           TIMER: { actions: 'decrementTimer' },
-          CHANGE_SIGNAL: 'green',
+          CHANGE_SIGNAL: {
+            target: 'green',
+            cond: (context, event) => event.signal === 'green',
+          },
+          SUBTRACT_TIME: { actions: 'subtractTime' },
+        },
+        after: {
+          3000: 'green',
         },
       },
       yellow: {
         entry: 'resetTimer',
         on: {
           TIMER: { actions: 'decrementTimer' },
-          CHANGE_SIGNAL: 'red',
+          CHANGE_SIGNAL: {
+            target: 'red',
+            cond: (context, event) => event.signal === 'red',
+          },
+          SUBTRACT_TIME: { actions: 'subtractTime' },
+        },
+        after: {
+          5000: 'red',
         },
       },
       green: {
         entry: 'resetTimer',
         on: {
           TIMER: { actions: 'decrementTimer' },
-          CHANGE_SIGNAL: 'yellow',
+          CHANGE_SIGNAL: {
+            target: 'yellow',
+            cond: (context, event) => event.signal === 'yellow',
+          },
           SUBTRACT_TIME: { actions: 'subtractTime' },
+        },
+        after: {
+          2000: 'yellow',
         },
       },
     },
@@ -35,23 +55,26 @@ const trafficLightMachine = createMachine(
   {
     actions: {
       decrementTimer: assign({
-        timer: (context, _) => Math.max(context.timer - 1, 0),
+        timer: (context) => Math.max(context.timer - 1, 0),
       }),
       resetTimer: assign({
-        timer: (context) => {
-          if (context.timer === 20) {
-            return 30; 
-          } else if (context.timer === 30) {
-            return 5; 
-          } 
-          
-          
-          
-          else {
-            return 30; 
+        timer: (_, event) => {
+          const { type } = event;
+          const target = type.substring(type.lastIndexOf('.') + 1);
+          switch (target) {
+            case 'red':
+              return 30;
+            case 'yellow':
+              return 5;
+            case 'green':
+              return 20;
+            default:
+              return 30;
           }
         },
       }),
+      
+      
       subtractTime: assign({
         timer: (context) => Math.max(context.timer - 10, 0),
       }),
