@@ -22,7 +22,7 @@ const App = () => {
     send('SUBTRACT_TIME')
   };
   return (
-    <div className="traffic-wrapper">
+    <div className="traffic-wrapper" >
       <div className="traffic-light-pole">
     <div id="traffic-light">
         <button
